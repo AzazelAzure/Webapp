@@ -145,7 +145,7 @@ function checkMove(piece, fromSquare){
 
         
             
-    }
+}
 
 //Rook Movement Logic
 function rook(fromSquare, color){

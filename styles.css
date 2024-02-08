@@ -2,19 +2,32 @@
 
 .black{
     background-color: chocolate;
-    height: 8vw;
-    width: 8vw;
+    height: 6vw;
+    width: 6vw;
     position: static;
 }
 
 .white{
     background-color: antiquewhite;
-    height: 8vw;
-    width: 8vw;
+    height: 6vw;
+    width: 6vw;
     position: static;
 }
 
 .piece{
     height: 90%;
     z-index: 1;
+}
+.board-elements{
+    height: 100vh !important;
+}
+
+.wcap{
+    height: 6vw;
+    width: 6vw;
+}
+
+.bcap{
+    height: 6vw;
+    width: 6vw;
 }
