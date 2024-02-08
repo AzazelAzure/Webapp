@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <div class="container d-flex flex-column">
+
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a8" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b8" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c8" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d8" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div >
+
+            <div id="e8" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f8" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g8" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h8" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a7" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b7" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c7" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d7" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="e7" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f7" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g7" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h7" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a6" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b6" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c6" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d6" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="e6" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f6" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g6" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h6" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a5" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b5" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c5" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d5" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="e5" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f5" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g5" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h5" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a4" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b4" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c4" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d4" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="e4" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f4" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g4" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h4" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a3" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b3" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c3" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d3" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="e3" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f3" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g3" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h3" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a2" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b2" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c2" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d2" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="e2" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f2" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g2" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h2" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+        <div class="d-flex justify-content-center align-content-center text-center">
+            <div id="a1" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="b1" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="c1" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="d1" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="e1" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="f1" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="g1" class="col-1 white" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+            <div id="h1" class="col-1 black" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+
+
+        
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="chess.js"></script>
+</body>
+</html>

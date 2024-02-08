@@ -1,0 +1,20 @@
+
+
+.black{
+    background-color: chocolate;
+    height: 8vw;
+    width: 8vw;
+    position: static;
+}
+
+.white{
+    background-color: antiquewhite;
+    height: 8vw;
+    width: 8vw;
+    position: static;
+}
+
+.piece{
+    height: 90%;
+    z-index: 1;
+}
