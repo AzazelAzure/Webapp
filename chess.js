@@ -2,6 +2,9 @@ var gameStart = true;
 
 var gameLog = [];
 
+var positions = [];
+
+
 //Place pieces in starting positions
 function placePieces(){
     for (let x = 0; x < 8; x++) {
@@ -35,7 +38,11 @@ function allowDrop(ev){
 function drag(ev){
     ev.dataTransfer.clearData();
     ev.dataTransfer.setData("text", ev.target.id);
-    console.log(`Picked up: ${ev.target.id}`)    
+    console.log(`Drag function`)
+    console.log(`Picked up: ${ev.target.id}`);
+    console.log(`Dragged from: ${$('#'+ev.target.id).closest('div').attr('id')}\n`)
+    checkMove(ev.target.id, $('#'+ev.target.id).closest('div').attr('id'));
+    console.log(`Found positions: ${positions}\n`);    
 }
 
 //Allows pieces to be dropped into new place
@@ -43,136 +50,192 @@ function drop(ev){
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
     console.log(`Item dropped: ${data}`)
-    console.log(`Square id: ${ev.target.id}`)
+    console.log(`Square id: ${ev.target.id}\n`)
 
     //Check for valid move
-    if (checkMove(data, ev.target.id)){
+    if (positions.includes(ev.target.id)){
         ev.target.appendChild(document.getElementById(data));
+        positions = [];
+        console.log(`Positions cleared: ${positions}`);
     } else{
+        positions = [];
+        console.log(`Positions cleared 1: ${positions}`);
         return;
     }
+    positions = [];
+    console.log(`Positions cleared 2: ${positions}`);
     
 }
 
-//Starts movement algorithm
-function checkMove(piece, square){
-    console.log(`Moving: ${piece}`)
-    console.log(`from: ${$("#"+piece).closest("div").attr('id')}`)
-    console.log(`to: ${square}\n`)
-    let detect = piece.slice(1);
-    let moving = piece.slice(0,-2);
-    console.log(`Piece detect: ${detect}`)
-    let currentSquare = $("#"+piece).closest("div").attr('id');
-    switch (detect) {
-        //Handle pawns
-        case ("bp"):
-            return pawn("down", currentSquare, square)
-        
-        case("wp"):
-            return pawn("up", currentSquare, square)
-            
-        default:
-            return movePiece(moving, currentSquare, square);
-                
-    }
-}
-
 //Moves Pieces
-function movePiece(piece, fromSquare, toSquare){
+function checkMove(piece, fromSquare){
+    console.log(`Check move function:`)
     console.log(`Piece: ${piece}`);
     console.log(`From: ${fromSquare}`);
-    console.log(`To: ${toSquare}`);
-    let diags = null;
-    let lines = null;
-    switch (piece){
+    if (piece.includes('p')){
+        detect = piece.slice(-2)    
+    } else{
+        detect = parseInt(piece).toString();
+    } 
+    console.log(`Detect: ${detect}`)
+    switch (detect){
         //White Rook
         case ("1"):
-            return rook(fromSquare, toSquare, 'w');
-
+            console.log(`Case 1`);
+            rook(fromSquare, 'w');
+            break;
         //White Knight
         case ("2"):
-            return knight(fromSquare, toSquare, 'w');
-
+            console.log(`Case 2`);
+            knight(fromSquare, 'w');
+            break;
         //White Bishop
         case ("3"):
-            return bishop(fromSquare, toSquare, 'w');
-        
+            console.log(`Case 3`);
+            bishop(fromSquare, 'w');
+            break;
         //White Queen
         case ("4"):
-            diags = bishop(fromSquare, toSquare, 'w');
-            lines = rook(fromSquare, toSquare, 'w');
-            if (diags === true || lines ===true){
-                return true;
-            } else{
-                return false;         
-            }
-        
+            console.log(`Case 4`);
+            bishop(fromSquare, 'w');
+            rook(fromSquare, 'w');
+            break;
         //White King    
         case("5"):
-            return king(fromSquare, toSquare, 'w');
-
+            console.log(`Case 5`);
+            king(fromSquare, 'w');
+            break;
         //Black Rook
         case("6"):
-            return rook(fromSquare, toSquare, 'b');
-                  
+            console.log(`Case 6`);
+            rook(fromSquare, 'b');
+            break;  
         //Black Knight
-        case("7"):            
-            return knight(fromSquare, toSquare, 'b');
-            
+        case("7"):
+            console.log(`Case 7`);
+            knight(fromSquare, 'b');
+            break;
         //Black Bishop    
         case("8"):
-            return bishop(fromSquare, toSquare, 'b');
-        
+            console.log(`Case 8`);
+            bishop(fromSquare, 'b');
+            break;
         //Black Queen   
-        case ("9"): 
-            diags = bishop(fromSquare, toSquare, 'b');
-            lines = rook(fromSquare, toSquare, 'b');
-            if (diags === true || lines ===true){
-                return true;
-            } else{
-                return false;         
-            }
-        
+        case ("9"):
+            console.log(`Case 9`); 
+            bishop(fromSquare, 'b');
+            rook(fromSquare, 'b');           
+            break;
         //Black King
         case ("10"):
-            return king(fromSquare, toSquare, 'b');    
+            console.log(`Case 10`);
+            king(fromSquare, 'b'); 
+            break;
+        //White Pawn
+        case ("wp"):
+            console.log(`Case WP`);
+            pawn(fromSquare, 'w');
+            break;
+        //Black Pawn
+        case ("bp"):
+            console.log(`Case BP`);
+            pawn(fromSquare, 'b')
+            break;
         }
 
+        
             
     }
 
 //Rook Movement Logic
-function rook(fromSquare, toSquare, color){
-    let vision = checkVision("r", fromSquare);
-    vision.sort();
-    let visionCheck = [];
-    console.log(`Rook from: ${fromSquare}`)
-    console.log(`Rook vision: ${vision}`);
-    for (let i = 0; i < vision.length; i++){
-        let splitter = vision[i].split(" ");
-        visionCheck.push(splitter[0]);
-        visionCheck.push(splitter[1]);
-    }
-    checker = visionCheck.indexOf(fromSquare);
-    console.log(`Rook visioncheck: ${visionCheck} Check index: ${visionCheck[checker]}  Checker: ${checker}`);
-    if(toSquare[0] == fromSquare[0]){
-        for (let i = 0; i < Math.abs((parseInt(toSquare[1]) - parseInt(fromSquare[1]))); i++){
+function rook(fromSquare, color){
+    let checker = null;
+    let update = true;
+    let nextRank = parseInt(fromSquare[1]);
+    let nextFile = fromSquare[0].charCodeAt(0);
+
+    //Check ranks going up
+    while(nextRank < 8){
+        nextRank++;
+        let rankCheck = fromSquare[0] + nextRank.toString();
+        console.log(`Rook rankcheck: ${rankCheck}`)
+        if (rankCheck === fromSquare){
             continue;
         }
-        return true;
-    } else if(toSquare[1] == fromSquare[1]){
-        return true;
-    } else {
-        return false;
+        checker = checkSquare(rankCheck)
+        update = updatePositions(checker, rankCheck, color);
+        if (update){
+            continue;
+        } else{
+            break;
+        }
     }
+    update = true;
+
+    //Check ranks going down
+    while(nextRank > 1){
+        nextRank--;
+        let rankCheck = fromSquare[0] + nextRank.toString();
+        console.log(`Rook rankcheck: ${rankCheck}`)
+        if (rankCheck === fromSquare){
+            continue;
+        }
+        checker = checkSquare(rankCheck)
+        update = updatePositions(checker, rankCheck, color);
+        if (update){
+            continue;
+        } else{
+            break;
+        }
+    }
+    update = true;
+
+    //Check files right
+    while(nextFile < 105){
+        nextFile++;
+        let fileCheck = String.fromCharCode(nextFile) + fromSquare[1];
+        console.log(`Rook filecheck: ${fileCheck}`)
+        if (fileCheck === fromSquare){
+            continue;
+        }
+        checker = checkSquare(fileCheck);
+        update = updatePositions(checker, fileCheck, color);
+        if (update){
+            continue;
+        } else{
+            break;
+        }
+    }
+    update = true;
+    
+    //check files right
+    while(nextFile > 96){
+        nextFile--;
+        let fileCheck = String.fromCharCode(nextFile) + fromSquare[1];
+        console.log(`Rook filecheck: ${fileCheck}`)
+        if (fileCheck === fromSquare){
+            continue;
+        }
+        checker = checkSquare(fileCheck);
+        update = updatePositions(checker, fileCheck, color); 
+        if (update){
+            continue;
+        } else{
+            break;
+        }
+    }
+
+        
+
+
 }
 
 //Knight Movement Logic
-function knight(fromSquare, toSquare){
+function knight(fromSquare, color){
     let squareSplit = fromSquare.split('')
     let ranks = [];
     let files = [];
-    let possible = [];
+    let checker = null;
     //Create arrays with possible directions
     for (let i = 1; i < 3; i++) {
         ranks.push((
@@ -202,125 +265,115 @@ function knight(fromSquare, toSquare){
         if (i < 2 ){
             for (let x = 0; x < 2; x++){
                 let move = ranks[i] + files [x];
-                possible.push(move);
+                checker = checkSquare(move);
+                updatePositions(checker, move, color);
             } 
         } else{
+            
             for (let x = 2; x < 4; x++){
-                let move2 = ranks[i] + files[x]
-                possible.push(move2);
+                let move2 = ranks[i] + files[x];
+                checker = checkSquare(move2);
+                updatePositions(checker, move2, color);
+
             }
         }
-        
+        update = true;
                                 
     }
-    console.log(`Possible Knight Moves: ${possible}`)
-    console.log(`Moved deemed possible: ${possible.includes(toSquare)}`)
-    return possible.includes(toSquare);
 }
 
 //Bishop Movement Logic
-function bishop(fromSquare, toSquare){
+function bishop(fromSquare, color){
+    console.log(`Bishop function: `)
+    console.log(`Bishop Color: ${color}`);
+    console.log(`Bishop from: ${fromSquare}`);
     let squareSplit = fromSquare.split('');
     let bisRank = squareSplit[0].charCodeAt(0);
     let bisFile = parseInt(squareSplit[1]);
     let count = 0;
-    let adder = 1;
-    let possible = [];
+    let next = null;
+    let update = null;
     while (count < 4){
-        console.log(`Bishop count: ${count}`);
-        console.log(`Loopstart bisrank: ${bisRank}`);
-        console.log(`Loopstart bisfile: ${bisFile}\n`);
+        console.log(`Bishop Entered loop\n`);
+        update = true;
+        let checker = null;
+        bisRank = squareSplit[0].charCodeAt(0);
+        bisFile = parseInt(squareSplit[1])
         //Up to right
         if (count === 0){
-            if (bisRank >= 104 || bisFile >= 8){
-                bisRank = squareSplit[0].charCodeAt(0);
-                bisFile = parseInt(squareSplit[1])
-                adder = 1;
-                count++;
-                continue;
+            while (update){
+                next = String.fromCharCode(bisRank + 1) + (bisFile + 1).toString();
+                checker = checkSquare(next);
+                console.log(`UR update loop next: ${next}`)
+                update = updatePositions(checker, next, color)
+                bisRank++;
+                bisFile++;
+                if (bisRank >= 104 || bisFile >= 8){   
+                    update = false;
                 }
-            possible.push(
-            (String.fromCharCode(bisRank + adder) + (bisFile + adder).toString())
-            )
-            bisRank = bisRank + adder;
-            bisFile = bisFile + adder;
-            console.log(`Up-Right Bisrank ASCII: ${bisRank}`)
-            console.log(`Up-Right Bisrank char: ${String.fromCharCode(bisRank)}`)
-            console.log(`Up-Right Bisfile: ${bisFile}`)
-            console.log(`Up-Right Count: ${count} Adder: ${adder} Current Possible: ${possible}\n`)
-            continue;
+            }   
+            count++;
+            continue;       
         }
+
         //Down and right
         if (count === 1){
-            if (bisRank >= 104 || bisFile <= 1){
-                bisRank = squareSplit[0].charCodeAt(0);
-                bisFile = parseInt(squareSplit[1])
-                adder = 1;
-                count++;
-                continue;
+            while (update){
+                next = String.fromCharCode(bisRank + 1) + (bisFile -1).toString()
+                checker = checkSquare(next)
+                console.log(`DR update loop next: ${next}`)
+                update = updatePositions(checker, next, color);
+                bisRank++;
+                bisFile--;
+                if (bisRank >= 104 || bisFile <= 1){
+                    update = false;
+                }
             }
-            possible.push(
-                (String.fromCharCode(bisRank + adder) + (bisFile - adder).toString())
-            )
-            bisRank = bisRank + adder;
-            bisFile = bisFile - adder;
-            console.log(`Down-Right Bisrank ASCII: ${bisRank}`)
-            console.log(`Down-Right Bisrank char: ${String.fromCharCode(bisRank)}`)
-            console.log(`Down-Right Bisfile: ${bisFile}`)
-            console.log(`Down-Right Count: ${count} Adder: ${adder} Current Possible: ${possible}\n`)
+            count++; 
             continue;
         }
+
         //Up and left    
         if (count == 2){
-            if (bisRank <= 97 || bisFile >= 8){
-                bisRank = squareSplit[0].charCodeAt(0);
-                bisFile = parseInt(squareSplit[1])
-                adder = 1;
-                count++;
-                continue;
+            while(update){
+                next = String.fromCharCode(bisRank - 1) + (bisFile + 1).toString()
+                checker = checkSquare(next)
+                console.log(`UL update loop next: ${next}`)
+                update = updatePositions(checker, next, color);
+                bisRank--;
+                bisFile++;
+                if (bisRank <= 97 || bisFile >= 8){
+                    update = false;
+                }
             }
-            possible.push(
-                String.fromCharCode(bisRank - adder) + (bisFile + adder).toString()
-            )
-            bisRank = bisRank - adder;
-            bisFile = bisFile + adder;
-            console.log(`Up-Left Bisrank ASCII: ${bisRank}`)
-            console.log(`Up-Left Bisrank char: ${String.fromCharCode(bisRank)}`)
-            console.log(`Up-Left Bisfile: ${bisFile}`)
-            console.log(`Up-Left Count: ${count} Adder: ${adder} Current Possible: ${possible}\n`)
+            count++;
             continue;
         }
+
         //Down and left
         if (count === 3){
-            if (bisRank <= 97 || bisFile <= 1){
-                bisRank = squareSplit[0].charCodeAt(0);
-                bisFile = parseInt(squareSplit[1])
-                adder = 1;
-                count++;
-                continue;
+            while(update){
+                next = String.fromCharCode(bisRank - 1) + (bisFile - 1).toString()
+                checker = checkSquare(next)
+                console.log(`DL update loop next: ${next}`)
+                update = updatePositions(checker, next, color)
+                bisRank--;
+                bisFile--;
+                if (bisRank <= 97 || bisFile <= 1){
+                    update = false;
+                }
             }
-            possible.push(
-                String.fromCharCode(bisRank - adder) + (bisFile - adder).toString()
-            )
-            bisRank = bisRank - adder;
-            bisFile = bisFile - adder;
-            console.log(`Down-Left Bisrank ASCII: ${bisRank}`)
-            console.log(`Down-Left Bisrank char: ${String.fromCharCode(bisRank)}`)
-            console.log(`Down-Left Bisfile: ${bisFile}`)
-            console.log(`Down-Left Count: ${count} Adder: ${adder} Current Possible: ${possible}`)
-            continue;
-        }
-                     
-    }
-    console.log(`Bishop moves: ${possible}`)
-    return possible.includes(toSquare);  
+            count++;    
+        }                   
+    } 
 }
 
 //King Movement Logic
-function king(fromSquare, toSquare){
-    let possible = [];
+function king(fromSquare, color){
     let ranks = [];
     let files = [];
+    let possible = [];
+    let checker = null;
     let squareSplit = fromSquare.split('');
     ranks.push(squareSplit[0]);
     files.push(squareSplit[1]);
@@ -328,65 +381,72 @@ function king(fromSquare, toSquare){
     ranks.push(String.fromCharCode((squareSplit[0].charCodeAt(0) - 1)));
     files.push((parseInt(squareSplit[1]) + 1).toString());
     files.push((parseInt(squareSplit[1]) - 1).toString());
-    console.log(`Kings ranks: ${ranks}  Length: ${ranks.length}`);
-    console.log(`Kings files: ${files} Length: ${files.length}`);
     for (let i = 0; i < 3; i++){
         possible.push((ranks[i] + files[0]));
         possible.push((ranks[i] + files[1]));
         possible.push((ranks[i] + files[2]));
-        console.log(`Kings possible: ${possible}`); 
     }
-    return possible.includes(toSquare);
+    for (let i = 0; i < possible.length; i++){
+        checker = checkSquare(possible[i]);
+        update = updatePositions(checker, possible[i] ,color);
+    }
 }
 
-//Pawn Movement Logice
-function pawn(direction, fromSquare, toSquare){
-    if (direction === "down"){
-        if ((parseInt(fromSquare[1]) - parseInt(toSquare[1])) != 1){
-            return false;
-        } else{
-            return true;
-        }
+//Pawn Movement Logic
+function pawn(fromSquare, color){
+    let checker = null;
+    let move = null;
+    if (color === "b"){
+        move = fromSquare[0] + (parseInt(fromSquare[1]) - 1);
+        checker = checkSquare(move);
+        updatePositions(checker, move, color)
     }
 
-    if (direction === "up"){
-        if((parseInt(fromSquare[1]) + 1) != parseInt(toSquare[1])){
-            return false;
-        } else{
-            return true;
-        }
+    if (color === "w"){
+        move = fromSquare[0] + (parseInt(fromSquare[1]) + 1);
+        checker = checkSquare(move);
+        updatePositions(checker, move, color);
     }
 
 }
 
-function checkVision(piece, fromSquare){
-    let squareSplit = fromSquare.split('');
-    let occupied = [];
-    switch(piece){
-        case("r"):
-            for (let i = 0; i < 8 ; i++){
-                let childCheck = 'div#'+ squareSplit[0] + i.toString() + " img:last-child";
-                let foundParent = 'div#'+ squareSplit[0] + i.toString()
-                if ($(childCheck).length > 0){
-                    if($(childCheck).attr("id") === "#"+fromSquare){
-                        continue;
-                    } else{
-                        occupied.push($(foundParent).attr("id") + " " + $(childCheck).attr("id") )
-                    }
-                    
-                }
-                childCheck = 'div#' + String.fromCharCode(97 + i) + squareSplit[1] + ' img:last-child';
-                foundParent = 'div#' + String.fromCharCode(97 + i) + squareSplit[1]
-                if ($(childCheck).length > 0){
-                    if($(childCheck).attr("id") === "#"+fromSquare){
-                        continue;
-                    } else{
-                        occupied.push($(foundParent).attr("id") + " " + $(childCheck).attr("id") )
-                    }
-                    
-                }
-            }
-            return occupied;
+//Checks square for piece.  If found returns piece id, otherwise returns false. Returns true if square invalid.
+function checkSquare(square){
+    let alpha = square[0].charCodeAt(0);
+    let num = square[1];
+    if (alpha < 97 || alpha > 104){
+        return true;
+    }
+    if (num < 1 || num > 8){
+        return true;
+    }
+    square = "div#" + square + " img:last-child";
+    if ($(square).length > 0){
+        return $(square).attr("id");
+    } else{
+        return false;
+    }
+}
+
+function updatePositions(check, square, color){
+    console.log(`Update log:`);
+    console.log(`Incoming check: ${check}`);
+    console.log(`Incoming square: ${square}`);
+    console.log(`Incoming color: ${color}`);
+    if (check === false){
+        positions.push(square)
+        console.log(`Pushed incoming square\n`)
+        return true;
+    } else if (check === true) {
+        console.log(`Invalid square\n`)
+        return false;
+    } else if (check.includes(color)){
+        console.log(`Found color in square\n`)
+        return false;
+    } else {
+        console.log(`Pushed opponent square\n`)
+        positions.push(check);
+        return false;
     }
 }
 
