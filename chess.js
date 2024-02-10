@@ -4,9 +4,15 @@ var gameLog = [];
 
 var positions = [];
 
+var kingVision = [];
+
 var turn = true;
 
 var turnNum = 0;
+
+var wKing = false;
+
+var bKing = false;
 
 
 //Place pieces in starting positions
@@ -46,7 +52,8 @@ function drag(ev){
     ev.dataTransfer.setData("text", ev.target.id);
     console.log(`Drag function`)
     console.log(`Picked up: ${ev.target.id}`);
-    console.log(`Dragged from: ${$('#'+ev.target.id).closest('div').attr('id')}\n`)
+    console.log(`Dragged from: ${$('#'+ev.target.id).closest('div').attr('id')}`)
+    inCheck();
     checkMove(ev.target.id, $('#'+ev.target.id).closest('div').attr('id'));
     console.log(`Found positions: ${positions}\n`);    
 }
@@ -55,32 +62,13 @@ function drag(ev){
 function drop(ev){
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
-    console.log(`Item dropped: ${data}`)
-    console.log(`Square id: ${ev.target.id}\n`)
-
-    //Check for valid move
-    if (positions.includes(ev.target.id)){
-        let canCap = capture(ev.target.id);
-        canCap.append(document.getElementById(data));
-        logMoves(data, canCap)
-        positions = [];
-        if (!turn){
-            turnNum++;   
-        }
-        console.log(`Turn number: ${turnNum}`)
-        turn = !turn;
-        console.log(`Positions cleared: ${positions}`);
-    } else{
-        positions = [];
-        console.log(`Positions cleared 1: ${positions}`);
-        return;
-    }
-    positions = [];
-    console.log(`Positions cleared 2: ${positions}`);
-    
+    console.log(`Item dropped: ${data}`);
+    console.log(`Square id: ${ev.target.id}\n`);
+    movePiece(data, ev.target.id);    
 }
 
-//Moves Pieces
+
+//Begins move validation
 function checkMove(piece, fromSquare){
     console.log(`Check move function:`)
     console.log(`Piece: ${piece}`);
@@ -103,70 +91,130 @@ function checkMove(piece, fromSquare){
     switch (detect){
         //White Rook
         case ("1"):
-            console.log(`Case 1`);
+            console.log(`Case 1\n`);
             rook(fromSquare, 'w');
             break;
         //White Knight
         case ("2"):
-            console.log(`Case 2`);
+            console.log(`Case 2\n`);
             knight(fromSquare, 'w');
             break;
         //White Bishop
         case ("3"):
-            console.log(`Case 3`);
+            console.log(`Case 3\n`);
             bishop(fromSquare, 'w');
             break;
         //White Queen
         case ("4"):
-            console.log(`Case 4`);
+            console.log(`Case 4\n`);
             bishop(fromSquare, 'w');
             rook(fromSquare, 'w');
             break;
         //White King    
         case("5"):
-            console.log(`Case 5`);
+            console.log(`Case 5\n`);
             king(fromSquare, 'w');
             break;
         //Black Rook
         case("6"):
-            console.log(`Case 6`);
+            console.log(`Case 6\n`);
             rook(fromSquare, 'b');
             break;  
         //Black Knight
         case("7"):
-            console.log(`Case 7`);
+            console.log(`Case 7\n`);
             knight(fromSquare, 'b');
             break;
         //Black Bishop    
         case("8"):
-            console.log(`Case 8`);
+            console.log(`Case 8\n`);
             bishop(fromSquare, 'b');
             break;
         //Black Queen   
         case ("9"):
-            console.log(`Case 9`); 
+            console.log(`Case 9\n`); 
             bishop(fromSquare, 'b');
             rook(fromSquare, 'b');           
             break;
         //Black King
         case ("10"):
-            console.log(`Case 10`);
+            console.log(`Case 10\n`);
             king(fromSquare, 'b'); 
             break;
         //White Pawn
         case ("wp"):
-            console.log(`Case WP`);
+            console.log(`Case WP\n`);
             pawn(fromSquare, 'w');
             break;
         //Black Pawn
         case ("bp"):
-            console.log(`Case BP`);
+            console.log(`Case BP\n`);
             pawn(fromSquare, 'b')
             break;
         }
 
         
             
+}
+
+//Moves piece if move is valid
+function movePiece(piece, square){
+    console.log(`Incoming Square: ${square}`)
+    console.log(`Incoming Piece: ${piece}`)
+    pColor = piece.slice(-2, -1);
+    console.log(`White king in check: ${wKing}`);
+    console.log(`Black king in check: ${bKing}`);
+    if (turn && pColor === 'b'){
+        return;
+    }
+    if (!turn && pColor === 'w'){
+        return;
+    }
+    if (piece === square){
+        return;
+    }
+    if (turn && !wKing){
+            let canCap = capture(square)
+            console.log(`White turn not in check\n`);
+            canCap.append(document.getElementById(piece));
+            logMoves(piece, canCap);
+            turn = !turn;
+            positions = [];
+        
+    } else if(turn && wKing){
+        let canCap = capture(square)
+        console.log(`White turn in check\n`);
+        if (kingVision.includes($(canCap).attr('id'))){
+            canCap.append(document.getElementById(piece));
+            logMoves(piece, canCap)
+            turn = !turn;
+            positions =[];
+        } else{
+            return;
+        }
+    }else if (!turn && !bKing){
+        let canCap = capture(square)
+        console.log(`Black turn not in check\n`);
+        canCap.append(document.getElementById(piece));
+        logMoves(piece, canCap);
+        turn = !turn;
+        positions = [];
+        turnNum++;
+    } else if(!turn && bKing){
+        let canCap = capture(square)
+        console.log(`Black turn in check`);
+        if (kingVision.includes($(canCap).attr('id'))){
+            canCap.append(document.getElementById(piece))
+            logMoves(piece, canCap)
+            turn = !turn;
+            positions = [];
+            turnNum++
+        } else{
+            return;
+        }
+    }
+    
+
 }
 
 //Rook Movement Logic
@@ -180,7 +228,6 @@ function rook(fromSquare, color){
     while(nextRank < 8){
         nextRank++;
         let rankCheck = fromSquare[0] + nextRank.toString();
-        console.log(`Rook rankcheck: ${rankCheck}`)
         if (rankCheck === fromSquare){
             continue;
         }
@@ -198,7 +245,6 @@ function rook(fromSquare, color){
     while(nextRank > 1){
         nextRank--;
         let rankCheck = fromSquare[0] + nextRank.toString();
-        console.log(`Rook rankcheck: ${rankCheck}`)
         if (rankCheck === fromSquare){
             continue;
         }
@@ -216,7 +262,6 @@ function rook(fromSquare, color){
     while(nextFile < 105){
         nextFile++;
         let fileCheck = String.fromCharCode(nextFile) + fromSquare[1];
-        console.log(`Rook filecheck: ${fileCheck}`)
         if (fileCheck === fromSquare){
             continue;
         }
@@ -234,7 +279,6 @@ function rook(fromSquare, color){
     while(nextFile > 96){
         nextFile--;
         let fileCheck = String.fromCharCode(nextFile) + fromSquare[1];
-        console.log(`Rook filecheck: ${fileCheck}`)
         if (fileCheck === fromSquare){
             continue;
         }
@@ -306,9 +350,7 @@ function knight(fromSquare, color){
 
 //Bishop Movement Logic
 function bishop(fromSquare, color){
-    console.log(`Bishop function: `)
-    console.log(`Bishop Color: ${color}`);
-    console.log(`Bishop from: ${fromSquare}`);
+
     let squareSplit = fromSquare.split('');
     let bisRank = squareSplit[0].charCodeAt(0);
     let bisFile = parseInt(squareSplit[1]);
@@ -316,7 +358,7 @@ function bishop(fromSquare, color){
     let next = null;
     let update = null;
     while (count < 4){
-        console.log(`Bishop Entered loop\n`);
+
         update = true;
         let checker = null;
         bisRank = squareSplit[0].charCodeAt(0);
@@ -326,7 +368,6 @@ function bishop(fromSquare, color){
             while (update){
                 next = String.fromCharCode(bisRank + 1) + (bisFile + 1).toString();
                 checker = checkSquare(next);
-                console.log(`UR update loop next: ${next}`)
                 update = updatePositions(checker, next, color)
                 bisRank++;
                 bisFile++;
@@ -343,7 +384,6 @@ function bishop(fromSquare, color){
             while (update){
                 next = String.fromCharCode(bisRank + 1) + (bisFile -1).toString()
                 checker = checkSquare(next)
-                console.log(`DR update loop next: ${next}`)
                 update = updatePositions(checker, next, color);
                 bisRank++;
                 bisFile--;
@@ -360,7 +400,6 @@ function bishop(fromSquare, color){
             while(update){
                 next = String.fromCharCode(bisRank - 1) + (bisFile + 1).toString()
                 checker = checkSquare(next)
-                console.log(`UL update loop next: ${next}`)
                 update = updatePositions(checker, next, color);
                 bisRank--;
                 bisFile++;
@@ -377,7 +416,6 @@ function bishop(fromSquare, color){
             while(update){
                 next = String.fromCharCode(bisRank - 1) + (bisFile - 1).toString()
                 checker = checkSquare(next)
-                console.log(`DL update loop next: ${next}`)
                 update = updatePositions(checker, next, color)
                 bisRank--;
                 bisFile--;
@@ -450,6 +488,7 @@ function checkSquare(square){
     }
 }
 
+//Updates piece for viable positions
 function updatePositions(check, square, color){
     console.log(`Update log:`);
     console.log(`Incoming check: ${check}`);
@@ -475,31 +514,23 @@ function updatePositions(check, square, color){
 //Allows capturing pieces
 function capture(square){    
     let squareSlice = square.slice(-2, -1);
-    console.log(`Hope this works: ${square.length}`)
     let parent = $('#'+square).closest('div').attr('id')
     if (square.length > 2){
-        console.log(`Found piece with color code ${squareSlice}`);
         if (squareSlice === 'b'){
             let emptyCap = $('div.wcap:empty:first');
-            console.log(`Full white tray?: ${emptyCap}`)
-            emptyCap.append(document.getElementById(square))
-            console.log(`Parent return: ${parent}`)
+            emptyCap.append(document.getElementById(square));
             return $('#'+parent);
         } else{
             let capTray = $('div.bcap:empty:first');
-            console.log(`Full black tray: ${capTray['0']}`)
-            capTray.append(document.getElementById(square))
-            console.log(`Parent return: ${parent}`)
+            capTray.append(document.getElementById(square));
             return $('#'+parent);
         }
     }
-    console.log(`Parent square: ${parent}`)
     return $('#'+square);
 }
 
 //Updates current moves
 function logMoves(piece, square){
-    console.log(`Logged square: ${$(square).attr('id')}`);
     if (turn){
         gameLog.push(turnNum.toString() +". " + piece + $(square).attr('id'));
         console.log(`Current game log: ${gameLog}\n`);
@@ -507,6 +538,37 @@ function logMoves(piece, square){
         addTurn = gameLog[(turnNum-1)] + " " + piece + $(square).attr('id');
         gameLog[(turnNum-1)] = addTurn;
         console.log(`Current game log: ${gameLog}\n`);
+    }
+}
+
+//Disallow moves if king in check
+function inCheck(){
+    
+    //Needs to check if an enemy piece has vision on king
+    if(turn){
+        let king = $('#5wl').closest('div').attr('id');
+        bishop(king, 'w');
+        rook(king, 'w');
+        kingVision = positions;
+        positions = [];
+        console.log(`White king vision: ${kingVision}\n`)
+        for (let i = 0; i < kingVision.length; i++){
+            if (kingVision[i].includes('b')){
+                wKing = true;
+            }
+        }
+    } else{
+        let king = $('#10bl').closest('div').attr('id');
+        bishop(king, 'b');
+        rook(king, 'b');
+        kingVision = positions;
+        positions = [];
+        console.log(`Black king vision: ${kingVision}\n`)
+        for (let i = 0; i < kingVision.length; i++){
+            if (kingVision[i].includes('w')){
+                bKing = true;
+            }
+        }
     }
 }
 
