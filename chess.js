@@ -555,6 +555,9 @@ function inCheck(){
         for (let i = 0; i < kingVision.length; i++){
             if (kingVision[i].includes('b')){
                 wKing = true;
+                break;
+            } else{
+                wKing = false;
             }
         }
     } else{
@@ -567,6 +570,9 @@ function inCheck(){
         for (let i = 0; i < kingVision.length; i++){
             if (kingVision[i].includes('w')){
                 bKing = true;
+                break;
+            } else{
+                bKing = false;
             }
         }
     }
