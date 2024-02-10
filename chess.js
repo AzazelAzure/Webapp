@@ -4,6 +4,10 @@ var gameLog = [];
 
 var positions = [];
 
+var turn = true;
+
+var turnNum = 0;
+
 
 //Place pieces in starting positions
 function placePieces(){
@@ -27,6 +31,8 @@ function placePieces(){
             $("#" + String.fromCharCode((109 - x)) + "1").html('<img src="./assets/images/' + white + '.png" class="piece" draggable="true" ondragstart="drag(event)" id="' + white.toString() + 'wr"></img>');
         }
     }
+    turnNum = 1;
+    gameLog = [];
 }
 
 //Allows space to accept piece
@@ -54,8 +60,15 @@ function drop(ev){
 
     //Check for valid move
     if (positions.includes(ev.target.id)){
-        ev.target.appendChild(document.getElementById(data));
+        let canCap = capture(ev.target.id);
+        canCap.append(document.getElementById(data));
+        logMoves(data, canCap)
         positions = [];
+        if (!turn){
+            turnNum++;   
+        }
+        console.log(`Turn number: ${turnNum}`)
+        turn = !turn;
         console.log(`Positions cleared: ${positions}`);
     } else{
         positions = [];
@@ -72,12 +85,21 @@ function checkMove(piece, fromSquare){
     console.log(`Check move function:`)
     console.log(`Piece: ${piece}`);
     console.log(`From: ${fromSquare}`);
+    pColor = piece.slice(-2,-1)
     if (piece.includes('p')){
         detect = piece.slice(-2)    
     } else{
         detect = parseInt(piece).toString();
     } 
     console.log(`Detect: ${detect}`)
+    console.log(`Piece color: ${pColor}`)
+    if (pColor ==='b' && turn){
+        console.log(`Not blacks turn: turn is ${turn}`)
+        return;
+    } else if (pColor ==='w' &! turn){
+        console.log(`Not whites turn: turn is ${turn}`)
+        return;
+    }
     switch (detect){
         //White Rook
         case ("1"):
@@ -447,6 +469,44 @@ function updatePositions(check, square, color){
         console.log(`Pushed opponent square\n`)
         positions.push(check);
         return false;
+    }
+}
+
+//Allows capturing pieces
+function capture(square){    
+    let squareSlice = square.slice(-2, -1);
+    console.log(`Hope this works: ${square.length}`)
+    let parent = $('#'+square).closest('div').attr('id')
+    if (square.length > 2){
+        console.log(`Found piece with color code ${squareSlice}`);
+        if (squareSlice === 'b'){
+            let emptyCap = $('div.wcap:empty:first');
+            console.log(`Full white tray?: ${emptyCap}`)
+            emptyCap.append(document.getElementById(square))
+            console.log(`Parent return: ${parent}`)
+            return $('#'+parent);
+        } else{
+            let capTray = $('div.bcap:empty:first');
+            console.log(`Full black tray: ${capTray['0']}`)
+            capTray.append(document.getElementById(square))
+            console.log(`Parent return: ${parent}`)
+            return $('#'+parent);
+        }
+    }
+    console.log(`Parent square: ${parent}`)
+    return $('#'+square);
+}
+
+//Updates current moves
+function logMoves(piece, square){
+    console.log(`Logged square: ${$(square).attr('id')}`);
+    if (turn){
+        gameLog.push(turnNum.toString() +". " + piece + $(square).attr('id'));
+        console.log(`Current game log: ${gameLog}\n`);
+    } else{
+        addTurn = gameLog[(turnNum-1)] + " " + piece + $(square).attr('id');
+        gameLog[(turnNum-1)] = addTurn;
+        console.log(`Current game log: ${gameLog}\n`);
     }
 }
 
