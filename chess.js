@@ -53,7 +53,6 @@ function drag(ev){
     console.log(`Drag function`)
     console.log(`Picked up: ${ev.target.id}`);
     console.log(`Dragged from: ${$('#'+ev.target.id).closest('div').attr('id')}`)
-    inCheck();
     checkMove(ev.target.id, $('#'+ev.target.id).closest('div').attr('id'));
     console.log(`Found positions: ${positions}\n`);    
 }
@@ -64,7 +63,11 @@ function drop(ev){
     var data = ev.dataTransfer.getData("text");
     console.log(`Item dropped: ${data}`);
     console.log(`Square id: ${ev.target.id}\n`);
-    movePiece(data, ev.target.id);    
+    if (data === ev.target.id){
+        return;
+    } else{
+        movePiece(data, ev.target.id);
+    }    
 }
 
 
@@ -164,26 +167,66 @@ function movePiece(piece, square){
     pColor = piece.slice(-2, -1);
     console.log(`White king in check: ${wKing}`);
     console.log(`Black king in check: ${bKing}`);
+    console.log(`Entrance positions: ${positions}`)
     if (turn && pColor === 'b'){
         return;
     }
     if (!turn && pColor === 'w'){
         return;
     }
-    if (piece === square){
-        return;
+    let parent = $('#'+piece).closest('div').attr('id');
+    if (piece === '5wl' || piece === '10bl'){
+        inCheck()
+        //pass
+    } else{
+        console.log(`Piece seen not a king.  Saw: ${piece}\n`)
+        let checker = $('#'+piece).detach();
+        console.log(`Parent: ${parent}`)
+        inCheck();
+        checker.appendTo($('#'+parent));
+        if(pColor === 'w' && wKing){
+            inCheck()
+        }
+        if (pColor === 'b' && bKing){
+            inCheck()
+        }
+        checker = null;
+        console.log(`Positions after inCheck: ${positions}`)
+        console.log(`Kings vision after incheck: ${kingVision}`)
     }
+    
     if (turn && !wKing){
-            let canCap = capture(square)
-            console.log(`White turn not in check\n`);
+        let canCap = capture(square)
+        console.log(`White turn not in check\n`);
+        console.log(`Cancap returned: ${$(canCap).attr('id')}`)
+        if (positions.includes($(canCap).attr('id'))){
             canCap.append(document.getElementById(piece));
             logMoves(piece, canCap);
             turn = !turn;
             positions = [];
+        } else{
+            return;
+        }
+            
         
     } else if(turn && wKing){
         let canCap = capture(square)
         console.log(`White turn in check\n`);
+        if (piece === '5wl'){
+            canCap.append(document.getElementById(piece));
+            inCheck();
+            if (wKing){
+                checker = ($('#5wl')).detach();
+                checker.appendTo('#' + parent);
+                return;
+            } else if (kingVision.includes($(canCap).attr('id'))){
+                canCap.append(document.getElementById(piece));
+                logMoves(piece, canCap)
+                turn = !turn;
+                positions =[];
+                }
+            }
+        
         if (kingVision.includes($(canCap).attr('id'))){
             canCap.append(document.getElementById(piece));
             logMoves(piece, canCap)
@@ -195,11 +238,16 @@ function movePiece(piece, square){
     }else if (!turn && !bKing){
         let canCap = capture(square)
         console.log(`Black turn not in check\n`);
-        canCap.append(document.getElementById(piece));
-        logMoves(piece, canCap);
-        turn = !turn;
-        positions = [];
-        turnNum++;
+        if (positions.includes($(canCap).attr('id'))){
+            canCap.append(document.getElementById(piece));
+            logMoves(piece, canCap);
+            turn = !turn;
+            positions = [];
+            turnNum++;
+        } else{
+            return;
+        }
+        
     } else if(!turn && bKing){
         let canCap = capture(square)
         console.log(`Black turn in check`);
@@ -298,6 +346,7 @@ function rook(fromSquare, color){
 
 //Knight Movement Logic
 function knight(fromSquare, color){
+    console.log(`Knight incoming square: ${fromSquare}`)
     let squareSplit = fromSquare.split('')
     let ranks = [];
     let files = [];
@@ -490,22 +539,19 @@ function checkSquare(square){
 
 //Updates piece for viable positions
 function updatePositions(check, square, color){
-    console.log(`Update log:`);
-    console.log(`Incoming check: ${check}`);
-    console.log(`Incoming square: ${square}`);
-    console.log(`Incoming color: ${color}`);
+
     if (check === false){
         positions.push(square)
-        console.log(`Pushed incoming square\n`)
+
         return true;
     } else if (check === true) {
-        console.log(`Invalid square\n`)
+
         return false;
     } else if (check.includes(color)){
-        console.log(`Found color in square\n`)
+
         return false;
     } else {
-        console.log(`Pushed opponent square\n`)
+
         positions.push(check);
         return false;
     }
@@ -543,34 +589,146 @@ function logMoves(piece, square){
 
 //Disallow moves if king in check
 function inCheck(){
-    
+    console.log(`Start incheck`);
+    let store = positions;
+    console.log(`Initial positions: ${positions}`);
+    console.log(`Initial store: ${store}`);
+    positions = [];
+    let checkKnights = [];
+    console.log(`Positions cleared: ${positions}`)
     //Needs to check if an enemy piece has vision on king
     if(turn){
-        let king = $('#5wl').closest('div').attr('id');
-        bishop(king, 'w');
-        rook(king, 'w');
-        kingVision = positions;
-        positions = [];
-        console.log(`White king vision: ${kingVision}\n`)
-        for (let i = 0; i < kingVision.length; i++){
-            if (kingVision[i].includes('b')){
+        let k = $('#5wl').closest('div').attr('id');
+
+        // Check for knights threatening
+        knight(k, 'w');
+        checkKnights = positions;
+        positions = store;
+
+        //If knight found update positions for knights position
+        for (let i = 0; i < checkKnights.length; i++){
+            if (checkKnights[i].includes('7')){
+                console.log(`King saw a knight at ${checkKnights[i]}`)
+                king(k, 'w');
+                kingVision = [];
+                kingVision.push(positions);
+                kingVision.push(checkKnights[i]);
+                console.log(`King checked by knight positions: ${kingVision}`)
                 wKing = true;
                 break;
             } else{
                 wKing = false;
             }
         }
-    } else{
-        let king = $('#10bl').closest('div').attr('id');
-        bishop(king, 'b');
-        rook(king, 'b');
-        kingVision = positions;
+
+        // Get all positions in ranks and filesq      
+        store = positions;
         positions = [];
-        console.log(`Black king vision: ${kingVision}\n`)
+        bishop(k, 'w');
+        rook(k, 'w');
+        kingVision = positions;
+        positions = store;
+        
+        //Check current positions for ranks and files
         for (let i = 0; i < kingVision.length; i++){
-            if (kingVision[i].includes('w')){
-                bKing = true;
+            if (kingVision[i].includes('bl') || kingVision[i].includes('br') || kingVision[i].includes('bp')){
+                
+                //Ignore pawns greater than 1 space away
+                if (kingVision[i].includes('bp')){
+                    console.log(`King saw a pawn`);
+                    let kLoc = $('#5wl').closest('div').attr('id');
+                    let pLoc = $('#' + kingVision[i]).closest('div').attr('id');
+                    console.log(`Pawn location at: ${pLoc}`);
+                    if ((parseInt(kLoc[1])) === (parseInt(pLoc[1])-1) ){
+                        console.log(`King file location: ${kLoc[1]}`);
+                        console.log(`Pawn space ahead location: ${(parseInt(pLoc[1])-1)}`)
+                        let capZones = [(pLoc[0].charCodeAt(0) -1), (pLoc[0].charCodeAt(0) + 1)]
+                        if ( capZones.includes(parseInt(kLoc[0].charCodeAt(0)))){
+                            wKing = true;
+                            break;
+                        }
+                    } else{
+                        continue;
+                    }
+                }
+
+                //Ignore knights in rank/file
+                if (kingVision[i].includes('7')){
+                    continue;
+                }
+                console.log(`White king now in check due to : ${kingVision[i]}`);
+                wKing = true;
                 break;
+            } else{
+                wKing = false;
+            }
+        }
+
+        console.log(`White king vision: ${kingVision}`);
+        console.log(`Positiosn after king check: ${positions}`);
+        console.log(`Stored positions: ${store}`);
+    } else{
+        let k = $('#10bl').closest('div').attr('id');
+
+        // Check for knights threatening
+        knight(k, 'b');
+        checkKnights = positions;
+        positions = store;
+
+        //If knight found update positions for knights position
+        for (let i = 0; i < checkKnights.length; i++){
+            if (checkKnights[i].includes('2')){
+                console.log(`King saw a knight at ${checkKnights[i]}`)
+                king(k, 'b');
+                kingVision = [];
+                kingVision.push(positions);
+                kingVision.push(checkKnights[i]);
+                console.log(`King checked by knight positions: ${kingVision}`)
+                wKing = true;
+                return;
+            } else{
+                wKing = false;
+            }
+        }
+
+        // Get all positions in ranks and filesq      
+        store = positions;
+        positions = [];
+        bishop(k, 'b');
+        rook(k, 'b');
+        kingVision = positions;
+        positions = store;
+        
+        //Check current positions for ranks and files
+        for (let i = 0; i < kingVision.length; i++){
+            if (kingVision[i].includes('wl') || kingVision[i].includes('wr') || kingVision[i].includes('wp')){
+                
+                //Ignore pawns greater than 1 space away
+                if (kingVision[i].includes('wp')){
+                    console.log(`King saw a pawn`);
+                    let kLoc = $('#10bl').closest('div').attr('id');
+                    let pLoc = $('#' + kingVision[i]).closest('div').attr('id');
+                    console.log(`Pawn location at: ${pLoc}`);
+                    if ((parseInt(kLoc[1])) === (parseInt(pLoc[1])+1) ){
+                        console.log(`King file location: ${kLoc[1]}`);
+                        console.log(`Pawn space ahead location: ${(parseInt(pLoc[1])-1)}`)
+                        let capZones = [(pLoc[0].charCodeAt(0) -1), (pLoc[0].charCodeAt(0) + 1)]
+                        if ( capZones.includes(parseInt(kLoc[0].charCodeAt(0)))){
+                            bKing = true;
+                            return;
+                        }
+                    } else{
+                        continue;
+                    }
+                }
+
+                //Ignore knights in rank/file
+                if (kingVision[i].includes('2')){
+                    continue;
+                }
+                console.log(`Black king now in check due to : ${kingVision[i]}`);
+                bKing = true;
+                return;
             } else{
                 bKing = false;
             }
