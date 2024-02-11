@@ -615,7 +615,7 @@ function inCheck(){
                 kingVision.push(checkKnights[i]);
                 console.log(`King checked by knight positions: ${kingVision}`)
                 wKing = true;
-                break;
+                return;
             } else{
                 wKing = false;
             }
@@ -645,7 +645,7 @@ function inCheck(){
                         let capZones = [(pLoc[0].charCodeAt(0) -1), (pLoc[0].charCodeAt(0) + 1)]
                         if ( capZones.includes(parseInt(kLoc[0].charCodeAt(0)))){
                             wKing = true;
-                            break;
+                            return;
                         }
                     } else{
                         continue;
@@ -691,7 +691,7 @@ function inCheck(){
             }
         }
 
-        // Get all positions in ranks and filesq      
+        // Get all positions in ranks and files      
         store = positions;
         positions = [];
         bishop(k, 'b');
