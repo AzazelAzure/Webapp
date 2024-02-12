@@ -66,7 +66,9 @@ function drop(ev){
     if (data === ev.target.id){
         return;
     } else{
+        ev.target.appendChild(document.getElementById(data));
         movePiece(data, ev.target.id);
+        
     }    
 }
 
@@ -200,7 +202,7 @@ function movePiece(piece, square){
         console.log(`White turn not in check\n`);
         console.log(`Cancap returned: ${$(canCap).attr('id')}`)
         if (positions.includes($(canCap).attr('id'))){
-            canCap.append(document.getElementById(piece));
+            canCap.append(document.getElementById(piece));            
             logMoves(piece, canCap);
             turn = !turn;
             positions = [];
@@ -231,7 +233,7 @@ function movePiece(piece, square){
             canCap.append(document.getElementById(piece));
             logMoves(piece, canCap)
             turn = !turn;
-            positions =[];
+            positionw =[];
         } else{
             return;
         }
