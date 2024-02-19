@@ -63,15 +63,22 @@ function drop(ev){
     var data = ev.dataTransfer.getData("text");
     console.log(`Item dropped: ${data}`);
     console.log(`Square id: ${ev.target.id}\n`);
+    let parent = $('#' + ev.target.id).closest('div').attr('id');
+    console.log(`Moved parent: ${parent}`)
     if (data === ev.target.id){
         return;
     } else{
-        ev.target.appendChild(document.getElementById(data));
         movePiece(data, ev.target.id);
-        
+        if (ev.target.id.includes('b') || ev.target.id.includes('w')){
+            console.log(`Prelog parent: ${parent}`)
+            logMoves(data, ('#' + parent));
+            let mover = $('#' + data).detach();
+            mover.appendTo('#' + parent);
+            turn = !turn;
+            positions = [];
+        } 
     }    
 }
-
 
 //Begins move validation
 function checkMove(piece, fromSquare){
@@ -170,16 +177,20 @@ function movePiece(piece, square){
     console.log(`White king in check: ${wKing}`);
     console.log(`Black king in check: ${bKing}`);
     console.log(`Entrance positions: ${positions}`)
-    if (turn && pColor === 'b'){
+    if (pColor === 'b' && turn){
+        console.log(`Not blacks turn: turn: ${turn}`)
+        positions =[];
         return;
     }
-    if (!turn && pColor === 'w'){
+    if (pColor === 'w' &! turn){
+        console.log(`Not whites turn: turn ${turn}`)
+        positions =[];
         return;
     }
+    console.log(`Out of turn check pass`);
     let parent = $('#'+piece).closest('div').attr('id');
     if (piece === '5wl' || piece === '10bl'){
         inCheck()
-        //pass
     } else{
         console.log(`Piece seen not a king.  Saw: ${piece}\n`)
         let checker = $('#'+piece).detach();
