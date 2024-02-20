@@ -51,8 +51,6 @@ function drag(ev){
     ev.dataTransfer.clearData();
     ev.dataTransfer.setData("text", ev.target.id);
     console.log(`Drag function`)
-    console.log(`Picked up: ${ev.target.id}`);
-    console.log(`Dragged from: ${$('#'+ev.target.id).closest('div').attr('id')}`)
     checkMove(ev.target.id, $('#'+ev.target.id).closest('div').attr('id'));
     console.log(`Found positions: ${positions}\n`);    
 }
@@ -61,16 +59,13 @@ function drag(ev){
 function drop(ev){
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
-    console.log(`Item dropped: ${data}`);
-    console.log(`Square id: ${ev.target.id}\n`);
     let parent = $('#' + ev.target.id).closest('div').attr('id');
-    console.log(`Moved parent: ${parent}`)
     if (data === ev.target.id){
         return;
     } else{
-        movePiece(data, ev.target.id);
-        if (ev.target.id.includes('b') || ev.target.id.includes('w')){
-            console.log(`Prelog parent: ${parent}`)
+        moveValid(data, ev.target.id);
+        if (ev.target.id.includes('l') || ev.target.id.includes('r') || ev.target.id.includes('p')){
+            console.log(`entered capture logic`)
             logMoves(data, ('#' + parent));
             let mover = $('#' + data).detach();
             mover.appendTo('#' + parent);
@@ -80,19 +75,20 @@ function drop(ev){
     }    
 }
 
-//Begins move validation
+//Gets possible positions
 function checkMove(piece, fromSquare){
-    console.log(`Check move function:`)
-    console.log(`Piece: ${piece}`);
-    console.log(`From: ${fromSquare}`);
-    pColor = piece.slice(-2,-1)
+    pColor = piece.slice(-2,-1) // Grabs the color of the piece
+
+    // Change detect to grab piece numbers
     if (piece.includes('p')){
+        // Fixes detect to grab the pawn type
         detect = piece.slice(-2)    
     } else{
+        // Grabs Int of piece. 
         detect = parseInt(piece).toString();
     } 
-    console.log(`Detect: ${detect}`)
-    console.log(`Piece color: ${pColor}`)
+
+    // Stops validation if move is made out of turn
     if (pColor ==='b' && turn){
         console.log(`Not blacks turn: turn is ${turn}`)
         return;
@@ -100,67 +96,57 @@ function checkMove(piece, fromSquare){
         console.log(`Not whites turn: turn is ${turn}`)
         return;
     }
+
+    // Switch case to determine how to handle the piece
     switch (detect){
         //White Rook
         case ("1"):
-            console.log(`Case 1\n`);
             rook(fromSquare, 'w');
             break;
         //White Knight
         case ("2"):
-            console.log(`Case 2\n`);
             knight(fromSquare, 'w');
             break;
         //White Bishop
         case ("3"):
-            console.log(`Case 3\n`);
             bishop(fromSquare, 'w');
             break;
         //White Queen
         case ("4"):
-            console.log(`Case 4\n`);
             bishop(fromSquare, 'w');
             rook(fromSquare, 'w');
             break;
         //White King    
         case("5"):
-            console.log(`Case 5\n`);
             king(fromSquare, 'w');
             break;
         //Black Rook
         case("6"):
-            console.log(`Case 6\n`);
             rook(fromSquare, 'b');
             break;  
         //Black Knight
         case("7"):
-            console.log(`Case 7\n`);
             knight(fromSquare, 'b');
             break;
         //Black Bishop    
         case("8"):
-            console.log(`Case 8\n`);
             bishop(fromSquare, 'b');
             break;
         //Black Queen   
         case ("9"):
-            console.log(`Case 9\n`); 
             bishop(fromSquare, 'b');
             rook(fromSquare, 'b');           
             break;
         //Black King
         case ("10"):
-            console.log(`Case 10\n`);
             king(fromSquare, 'b'); 
             break;
         //White Pawn
         case ("wp"):
-            console.log(`Case WP\n`);
             pawn(fromSquare, 'w');
             break;
         //Black Pawn
         case ("bp"):
-            console.log(`Case BP\n`);
             pawn(fromSquare, 'b')
             break;
         }
@@ -169,34 +155,31 @@ function checkMove(piece, fromSquare){
             
 }
 
-//Moves piece if move is valid
-function movePiece(piece, square){
-    console.log(`Incoming Square: ${square}`)
-    console.log(`Incoming Piece: ${piece}`)
+//Checks is move is valid before moving
+function moveValid(piece, square){
     pColor = piece.slice(-2, -1);
-    console.log(`White king in check: ${wKing}`);
-    console.log(`Black king in check: ${bKing}`);
-    console.log(`Entrance positions: ${positions}`)
     if (pColor === 'b' && turn){
-        console.log(`Not blacks turn: turn: ${turn}`)
         positions =[];
         return;
     }
     if (pColor === 'w' &! turn){
-        console.log(`Not whites turn: turn ${turn}`)
         positions =[];
         return;
     }
-    console.log(`Out of turn check pass`);
-    let parent = $('#'+piece).closest('div').attr('id');
+
+    let parent = $('#'+piece).closest('div').attr('id'); // Defines the parent square from the piece
+
     if (piece === '5wl' || piece === '10bl'){
+        // Checks first if the piece is the king being moved
         inCheck()
     } else{
-        console.log(`Piece seen not a king.  Saw: ${piece}\n`)
+        // Temporarily removes piece from the board to check
+        // if moving that piece puts the king in check
         let checker = $('#'+piece).detach();
-        console.log(`Parent: ${parent}`)
         inCheck();
         checker.appendTo($('#'+parent));
+
+        // Check to see if still in check
         if(pColor === 'w' && wKing){
             inCheck()
         }
@@ -208,10 +191,13 @@ function movePiece(piece, square){
         console.log(`Kings vision after incheck: ${kingVision}`)
     }
     
+    // White turn if not in check
     if (turn && !wKing){
         let canCap = capture(square)
         console.log(`White turn not in check\n`);
         console.log(`Cancap returned: ${$(canCap).attr('id')}`)
+
+        // Check if move is valid.  If valid allow. 
         if (positions.includes($(canCap).attr('id'))){
             canCap.append(document.getElementById(piece));            
             logMoves(piece, canCap);
@@ -222,41 +208,44 @@ function movePiece(piece, square){
         }
             
         
+    // White turn if in check    
     } else if(turn && wKing){
         let canCap = capture(square)
         console.log(`White turn in check\n`);
+
+        // If piece moved is the king
         if (piece === '5wl'){
             canCap.append(document.getElementById(piece));
             inCheck();
             if (wKing){
+
+                // Return king if move doesn't take out of check
                 checker = ($('#5wl')).detach();
                 checker.appendTo('#' + parent);
                 return;
+
+                // Allow king to move out of check
             } else if (kingVision.includes($(canCap).attr('id'))){
-                canCap.append(document.getElementById(piece));
-                logMoves(piece, canCap)
-                turn = !turn;
-                positions =[];
+                movePiece(piece, canCap)
                 }
             }
-        
+          
+        // Moves piece if takes out check
         if (kingVision.includes($(canCap).attr('id'))){
-            canCap.append(document.getElementById(piece));
-            logMoves(piece, canCap)
-            turn = !turn;
-            positionw =[];
+            movePiece(piece, canCap);
+            // If move stays in check, stop processing
         } else{
             return;
         }
+
+    // Black turn and not in check
     }else if (!turn && !bKing){
         let canCap = capture(square)
         console.log(`Black turn not in check\n`);
+
+        // Allow move
         if (positions.includes($(canCap).attr('id'))){
-            canCap.append(document.getElementById(piece));
-            logMoves(piece, canCap);
-            turn = !turn;
-            positions = [];
-            turnNum++;
+            movePiece(piece, canCap)
         } else{
             return;
         }
@@ -265,11 +254,7 @@ function movePiece(piece, square){
         let canCap = capture(square)
         console.log(`Black turn in check`);
         if (kingVision.includes($(canCap).attr('id'))){
-            canCap.append(document.getElementById(piece))
-            logMoves(piece, canCap)
-            turn = !turn;
-            positions = [];
-            turnNum++
+            movePiece(piece, canCap)
         } else{
             return;
         }
@@ -359,7 +344,6 @@ function rook(fromSquare, color){
 
 //Knight Movement Logic
 function knight(fromSquare, color){
-    console.log(`Knight incoming square: ${fromSquare}`)
     let squareSplit = fromSquare.split('')
     let ranks = [];
     let files = [];
@@ -382,11 +366,10 @@ function knight(fromSquare, color){
             (parseInt(squareSplit[1]) - i).toString()
         ));
         
-        console.log(`Files: ${files}`);
     }
     
     ranks.reverse();
-    console.log(`Ranks sorted: ${ranks}`);
+
     //Combine arrays into actual board locations    
     for (let i = 0; i < files.length; i++){
         
@@ -405,7 +388,6 @@ function knight(fromSquare, color){
 
             }
         }
-        update = true;
                                 
     }
 }
@@ -604,11 +586,8 @@ function logMoves(piece, square){
 function inCheck(){
     console.log(`Start incheck`);
     let store = positions;
-    console.log(`Initial positions: ${positions}`);
-    console.log(`Initial store: ${store}`);
     positions = [];
     let checkKnights = [];
-    console.log(`Positions cleared: ${positions}`)
     //Needs to check if an enemy piece has vision on king
     if(turn){
         let k = $('#5wl').closest('div').attr('id');
@@ -648,13 +627,10 @@ function inCheck(){
                 
                 //Ignore pawns greater than 1 space away
                 if (kingVision[i].includes('bp')){
-                    console.log(`King saw a pawn`);
                     let kLoc = $('#5wl').closest('div').attr('id');
                     let pLoc = $('#' + kingVision[i]).closest('div').attr('id');
                     console.log(`Pawn location at: ${pLoc}`);
                     if ((parseInt(kLoc[1])) === (parseInt(pLoc[1])-1) ){
-                        console.log(`King file location: ${kLoc[1]}`);
-                        console.log(`Pawn space ahead location: ${(parseInt(pLoc[1])-1)}`)
                         let capZones = [(pLoc[0].charCodeAt(0) -1), (pLoc[0].charCodeAt(0) + 1)]
                         if ( capZones.includes(parseInt(kLoc[0].charCodeAt(0)))){
                             wKing = true;
@@ -749,5 +725,14 @@ function inCheck(){
     }
 }
 
+function movePiece(piece, square){
+    square.append(document.getElementById(piece));
+    logMoves(piece, square);
+    if (!turn){
+        turnNum++
+    }
+    turn = !turn
+    positions = [];
+}
+
 placePieces();
-//console.log($("#b7").closest("div").attr('id'));
